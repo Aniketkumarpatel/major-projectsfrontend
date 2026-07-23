@@ -62,7 +62,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       setIsLoading(false);
-      const msg = err.response?.data?.message || err.message || 'Invalid credentials';
+      let msg = err.response?.data?.message || err.message || 'Invalid credentials';
+      if (err.response?.data?.data?.errors && Array.isArray(err.response.data.data.errors)) {
+        msg = err.response.data.data.errors.map((e) => e.message).join(' | ');
+      }
       throw new Error(msg);
     }
   }, []);
@@ -85,7 +88,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       setIsLoading(false);
-      const msg = err.response?.data?.message || err.message || 'Registration failed';
+      let msg = err.response?.data?.message || err.message || 'Registration failed';
+      if (err.response?.data?.data?.errors && Array.isArray(err.response.data.data.errors)) {
+        msg = err.response.data.data.errors.map((e) => e.message).join(' | ');
+      }
       throw new Error(msg);
     }
   }, []);

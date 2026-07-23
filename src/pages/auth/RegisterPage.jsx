@@ -15,8 +15,8 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters.');
+    if (form.password.length < 8) {
+      toast.error('Password must be at least 8 characters.');
       return;
     }
     try {
@@ -57,7 +57,7 @@ const RegisterPage = () => {
           <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
           <div className="relative">
             <HiLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input name="password" type={showPass ? 'text' : 'password'} required value={form.password} onChange={handleChange} placeholder="Min. 6 characters" className="w-full pl-11 pr-11 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all" />
+            <input name="password" type={showPass ? 'text' : 'password'} required value={form.password} onChange={handleChange} placeholder="Min. 8 characters" className="w-full pl-11 pr-11 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all" />
             <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300">
               {showPass ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
             </button>
