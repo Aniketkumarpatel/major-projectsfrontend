@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiCalendar, HiClock, HiLocationMarker, HiCheckCircle, HiArrowLeft, HiArrowRight, HiCreditCard, HiShieldCheck } from 'react-icons/hi';
-import { serviceApi, bookingApi } from '@/services/api.service';
+import { bookingApi, serviceApi } from '@/services/api.service';
 import { toast } from 'react-hot-toast';
 
 const STEPS = ['Select Service', 'Schedule', 'Address', 'Confirm & Pay'];
@@ -25,30 +25,31 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [bookedBooking, setBookedBooking] = useState(null);
 
-  // Fetch Services from API
+  // Load services from real API
   useEffect(() => {
-    const loadServices = async () => {
+    const fetchServices = async () => {
+      setLoadingServices(true);
       try {
-        setLoadingServices(true);
-        const res = await serviceApi.getAll({ limit: 50 });
-        if (res.data?.success) {
-          const list = res.data.data.services || [];
-          setServices(list);
-          if (preselectedServiceId) {
-            const found = list.find((s) => (s._id || s.id) === preselectedServiceId);
-            if (found) {
-              setSelectedService(found);
-              setStep(1); // Jump to schedule if service preselected
-            }
+        const res = await serviceApi.getAll({ limit: 50, isActive: true });
+        const list = res.data?.data?.services || res.data?.data || [];
+        setServices(list);
+
+        // If a serviceId is passed in URL, preselect it and jump to step 1
+        if (preselectedServiceId) {
+          const found = list.find((s) => s._id === preselectedServiceId || s.id === preselectedServiceId);
+          if (found) {
+            setSelectedService(found);
+            setStep(1);
           }
         }
-      } catch {
-        toast.error('Failed to load services');
+      } catch (err) {
+        console.error('Failed to load services:', err);
+        toast.error('Services load karne mein problem aayi. Please refresh karein.');
       } finally {
         setLoadingServices(false);
       }
     };
-    loadServices();
+    fetchServices();
   }, [preselectedServiceId]);
 
   const canNext = () => {
@@ -65,23 +66,18 @@ const BookingPage = () => {
         service: selectedService._id || selectedService.id,
         bookingDate: selectedDate,
         timeSlot: selectedTime,
-        address: {
-          line1: address.line1,
-          city: address.city,
-          pincode: address.pincode,
-        },
+        address: { line1: address.line1, city: address.city, pincode: address.pincode },
         notes: address.notes,
       };
-
       const res = await bookingApi.create(payload);
       if (res.data?.success) {
         setBookedBooking(res.data.data.booking);
         toast.success('🎉 Booking confirmed! Provider notified.');
       } else {
-        toast.error(res.data?.message || 'Failed to create booking');
+        toast.error(res.data?.message || 'Booking create karne mein problem aayi');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Booking submission failed');
+      toast.error(err.response?.data?.message || 'Booking submit karne mein problem aayi. Please login karein.');
     } finally {
       setLoading(false);
     }
